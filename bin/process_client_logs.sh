@@ -4,7 +4,7 @@
 dir=$1
 
 cd ..
-
+cd $dir 
 grep -rh . | awk '{
 if (($6=="Failed")&&($10 == "user")){
 		{print ($1, $2, substr($3,0,2),$11,$13);}
