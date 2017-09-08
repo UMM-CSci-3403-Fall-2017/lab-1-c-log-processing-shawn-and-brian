@@ -4,10 +4,11 @@ dir=$1
 
 
 #Create neccessary data for pie chart
-cd ..
 cd $dir
-awk -F '{print $4}' * | sort | uniq -c | sort -nr > file.txt | awk '{print data.addRow([egerteterterterterterter,5867]);}' 
+grep -rh --include="failed_login_data.txt" . | awk '{print $4}' | sort | uniq -c | sort -nr | awk '{print "data.addRow([\x27"$2"\x27, " $1"]);"}' > temp.txt
 
+mv temp.txt ..
+cd ..
+sh bin/./wrap_contents.sh temp.txt html_components/username_dist username_dist.html
 
-
-
+mv username_dist.html $dir
