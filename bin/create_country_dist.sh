@@ -8,22 +8,30 @@ dir=$1
 cd $dir
 
 #Searches and displays content of falied_login_data.text
-#Then using awk to print the fourth column (usersNames) and we get a count for each unique user name and output that to .txt
-grep -rh --include="failed_login_data.txt" . | awk '{print $5}' | cat  > ip1.txt
+#Then using awk to print the fifth column (ip addresses) we output it to the ip1.txt
+grep -rh --include="failed_login_data.txt" . | awk '{print $5}' > ip1.txt
 
-cd $home
-cd etc 
-cp country_IP_map.txt $home/$dir 
-cd $home/$dir
-cat ip1.txt | sort > ip2.txt
+#We then go to home/etc and move the country_IP_map.txt to the given dir
+cd $home/etc
+mv country_IP_map.txt $dir 
+#Then we go to the given dir and sort ip1.txt and output it to ip2.txt
+cd $dir
+sort ip1.txt > ip2.txt
+
+#Then we use "join"  command to map ip addresses to the countries
 join ip2.txt country_IP_map.txt > out.txt
 
+#Here we print and then sort the second column (countries). Then we get a counter each of them and put them in data.addRow and output to the countries.txt
+awk '{print $2}' out.txt | sort | uniq -c | awk '{print "data.addRow([\x27"$2"\x27, "$1"]);"}' > countries.txt
 
-cat out.txt | awk '{print $2}' | sort | uniq -c | awk '{print "data.addRow([\x27"$2"\x27, "$1"]);"}' | cat > countries.txt
+#Remove temp files
 rm out.txt ip1.txt ip2.txt
 
+#Move countries.txt to home and then go to the home 
 mv countries.txt $home
 cd $home 
+
+
 
 #Run wrap contents to create html file
 sh ./bin/wrap_contents.sh countries.txt html_components/country_dist country_dist.html
@@ -32,6 +40,8 @@ sh ./bin/wrap_contents.sh countries.txt html_components/country_dist country_dis
 #Finally move html file  to the specified directory
 mv country_dist.html $dir
 
+#Move back the country_IP_map.txt and remove countries.txt for cleanup 
+mv $dir/country_IP_map.txt $home/etc
 rm countries.txt
 
 
